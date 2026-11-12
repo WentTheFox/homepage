@@ -18,8 +18,8 @@ import { ColorContext } from "utils/contexts/color";
 import { SettingsContext } from "utils/contexts/settings";
 import { TabContext } from "utils/contexts/tab";
 import { ThemeContext } from "utils/contexts/theme";
-import { masonryContainerClasses } from "utils/layout/columns";
 
+import { masonryContainerClasses } from "utils/layout/columns";
 import { withPageAuth } from "utils/auth";
 import { getDashboardData } from "utils/config/dashboard";
 import useWindowFocus from "utils/hooks/window-focus";
@@ -394,6 +394,7 @@ function Home({ initialSettings }) {
     settings.cardBlur,
     settings.groupsInitiallyCollapsed,
     settings.bookmarksStyle,
+    settings.masonry,
     initialSettings.layout,
   ]);
 

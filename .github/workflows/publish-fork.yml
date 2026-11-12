@@ -1,9 +1,9 @@
 name: Publish fork image
 
 # Fork-only (upstream's docker-publish.yml is guarded to gethomepage/homepage and stays untouched so merges from upstream stay trivial).
-# Publishes ghcr.io/<owner>/homepage, multi-arch, for EVERY push to main, tagged <sha7> and sha-<sha7>. There are no version tags and no `latest`:
-# the commit is the version. The sha-<sha7> tag is what Argo CD Image Updater follows (Rathalos repo, platform/argocd/apps/image-updater.yaml);
-# it is added as the very last registry step, so it never exists on a partial set.
+# Publishes ghcr.io/<owner>/homepage, multi-arch, for EVERY push to main, tagged <sha7>, sha-<sha7> and `latest`. There are no version tags:
+# the commit is the version, `latest` is a convenience pointer to the newest main build. The sha-<sha7> tag is what Argo CD Image Updater follows (Rathalos repo, platform/argocd/apps/image-updater.yaml);
+# it is added (together with `latest`) as the very last registry step, so neither exists on a partial set.
 # Each architecture is built natively on its own runner (no qemu), pushed as <sha7>-<arch>, then merged into one multi-arch tag.
 on:
   push:
@@ -88,9 +88,9 @@ jobs:
           docker buildx imagetools create -t "$repo:$sha" "$repo:$sha-amd64" "$repo:$sha-arm64"
 
       # Last registry step: only now that the multi-arch manifest list exists is the tag Image Updater follows added.
-      - name: Add the sha- tag
+      - name: Add the sha- and latest tags
         run: |
           repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/homepage"
           sha="${GITHUB_SHA:0:7}"
           docker buildx imagetools inspect "$repo:$sha" > /dev/null
-          docker buildx imagetools create -t "$repo:sha-$sha" "$repo:$sha"
+          docker buildx imagetools create -t "$repo:sha-$sha" -t "$repo:latest" "$repo:$sha"
