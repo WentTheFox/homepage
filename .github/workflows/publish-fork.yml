@@ -1,0 +1,96 @@
+name: Publish fork image
+
+# Fork-only (upstream's docker-publish.yml is guarded to gethomepage/homepage and stays untouched so merges from upstream stay trivial).
+# Publishes ghcr.io/<owner>/homepage, multi-arch, for EVERY push to main, tagged <sha7> and sha-<sha7>. There are no version tags and no `latest`:
+# the commit is the version. The sha-<sha7> tag is what Argo CD Image Updater follows (Rathalos repo, platform/argocd/apps/image-updater.yaml);
+# it is added as the very last registry step, so it never exists on a partial set.
+# Each architecture is built natively on its own runner (no qemu), pushed as <sha7>-<arch>, then merged into one multi-arch tag.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-fork-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: 'Build ${{ matrix.arch }}'
+    if: github.repository != 'gethomepage/homepage'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Work out names and tags
+        id: meta
+        run: |
+          echo "sha=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/homepage" >> "$GITHUB_OUTPUT"
+          echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # The Dockerfile builds the app itself when CI is not "true" (install + next build inside the image), so no prebuild step is needed.
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          push: true
+          platforms: linux/${{ matrix.arch }}
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}-${{ matrix.arch }}
+          build-args: |
+            BUILDTIME=${{ steps.meta.outputs.created }}
+            VERSION=sha-${{ steps.meta.outputs.sha }}
+            REVISION=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          provenance: false
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,scope=${{ matrix.arch }},mode=max
+
+  publish:
+    name: 'Publish multi-arch tags'
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge per-arch images into one multi-arch tag
+        run: |
+          repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/homepage"
+          sha="${GITHUB_SHA:0:7}"
+          docker buildx imagetools create -t "$repo:$sha" "$repo:$sha-amd64" "$repo:$sha-arm64"
+
+      # Last registry step: only now that the multi-arch manifest list exists is the tag Image Updater follows added.
+      - name: Add the sha- tag
+        run: |
+          repo="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/homepage"
+          sha="${GITHUB_SHA:0:7}"
+          docker buildx imagetools inspect "$repo:$sha" > /dev/null
+          docker buildx imagetools create -t "$repo:sha-$sha" "$repo:$sha"
