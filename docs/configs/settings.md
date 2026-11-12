@@ -192,6 +192,20 @@ As an example, this would produce the following layout:
 
 <img width="1260" alt="Screenshot 2022-09-15 at 8 03 57 PM" src="https://user-images.githubusercontent.com/82196/190466646-8ca94505-0fcf-4964-9687-3a6c7cd3144f.png">
 
+### Masonry Layout for Services
+
+By default the services in a `style: row` group sit in an even grid, so a tall card leaves a gap beneath its shorter neighbours. To pack the cards into columns instead, add `masonry: true` to that group (services only; bookmarks are unaffected):
+
+```yaml
+layout:
+  Media:
+    style: row
+    columns: 4
+    masonry: true
+```
+
+Cards then flow top to bottom through each column (CSS multi-column), so the order reads down each column rather than across rows. It has no effect without `style: row`.
+
 ### Icons-Only Layout
 
 You can also specify the an icon-only layout for bookmarks, either like so:
@@ -343,16 +357,6 @@ If you want to set the maximum columns for bookmark groups separately, you can d
 ```yaml
 maxBookmarkGroupColumns: 6 # default is 6, max 8
 ```
-
-### Masonry Layout
-
-By default groups are laid out in flex rows, so a tall group leaves a gap beneath its shorter neighbours. To pack groups into columns instead, add:
-
-```yaml
-masonry: true
-```
-
-Groups then flow top to bottom through each column (CSS multi-column), so the order reads down each column rather than across rows. The column counts follow the same breakpoints as the default layout and respect [maxGroupColumns](#maximum-group-columns). Groups with `style: row` still span the full width.
 
 ### Collapsible sections
 

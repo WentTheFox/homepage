@@ -6,8 +6,6 @@ import ResolvedIcon from "components/resolvedicon";
 import { useEffect, useRef } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
-import { masonryGroupClasses } from "../../utils/layout/columns";
-
 export default function BookmarksGroup({
   bookmarks,
   layout,
@@ -15,7 +13,6 @@ export default function BookmarksGroup({
   groupsInitiallyCollapsed,
   bookmarksStyle,
   maxGroupColumns,
-  masonry,
 }) {
   const panel = useRef();
 
@@ -27,10 +24,9 @@ export default function BookmarksGroup({
     <div
       key={bookmarks.name}
       className={classNames(
-        "bookmark-group overflow-hidden",
-        masonry ? masonryGroupClasses(layout) : "flex-1",
-        !masonry && (layout?.style === "row" ? "basis-full" : "basis-full md:basis-1/4 lg:basis-1/5 xl:basis-1/6"),
-        !masonry && layout?.style !== "row" && maxGroupColumns && parseInt(maxGroupColumns, 10) > 6
+        "bookmark-group flex-1 overflow-hidden",
+        layout?.style === "row" ? "basis-full" : "basis-full md:basis-1/4 lg:basis-1/5 xl:basis-1/6",
+        layout?.style !== "row" && maxGroupColumns && parseInt(maxGroupColumns, 10) > 6
           ? `3xl:basis-1/${maxGroupColumns}`
           : "",
         layout?.header === false ? "px-1" : "p-1 pb-0",

@@ -13,7 +13,7 @@ import SiteMonitor from "./site-monitor";
 import Status from "./status";
 import Widget from "./widget";
 
-export default function Item({ service, groupName, useEqualHeights }) {
+export default function Item({ service, groupName, useEqualHeights, masonry }) {
   const hasLink = service.href && service.href !== "#";
   const { settings } = useContext(SettingsContext);
   const showStats = service.showStats === false ? false : settings.showStats;
@@ -37,7 +37,11 @@ export default function Item({ service, groupName, useEqualHeights }) {
   };
 
   return (
-    <li key={service.name} id={service.id} className="service" data-name={service.name || ""}>
+    <li
+      key={service.name}
+      id={service.id}
+      className={masonry ? "service break-inside-avoid" : "service"}
+      data-name={service.name || ""}>
       <div
         className={classNames(
           settings.cardBlur !== undefined && `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,

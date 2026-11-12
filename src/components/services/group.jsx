@@ -5,7 +5,7 @@ import List from "components/services/list";
 import { useEffect, useRef } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
-import { columnMap, masonryGroupClasses } from "../../utils/layout/columns";
+import { columnMap } from "../../utils/layout/columns";
 
 export default function ServicesGroup({
   group,
@@ -15,7 +15,6 @@ export default function ServicesGroup({
   useEqualHeights,
   groupsInitiallyCollapsed,
   isSubgroup,
-  masonry,
 }) {
   const panel = useRef();
 
@@ -30,12 +29,9 @@ export default function ServicesGroup({
     <div
       key={group.name}
       className={classNames(
-        "services-group",
-        masonry && !isSubgroup ? masonryGroupClasses(layout) : "",
-        (!masonry || isSubgroup) && "flex-1",
-        (!masonry || isSubgroup) &&
-          (layout?.style === "row" ? "basis-full" : "basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4"),
-        (!masonry || isSubgroup) && layout?.style !== "row" && maxGroupColumns ? `3xl:basis-1/${maxGroupColumns}` : "",
+        "services-group flex-1",
+        layout?.style === "row" ? "basis-full" : "basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4",
+        layout?.style !== "row" && maxGroupColumns ? `3xl:basis-1/${maxGroupColumns}` : "",
         groupPadding,
         isSubgroup ? "subgroup" : "",
       )}

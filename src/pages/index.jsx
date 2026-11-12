@@ -19,7 +19,6 @@ import { SettingsContext } from "utils/contexts/settings";
 import { TabContext } from "utils/contexts/tab";
 import { ThemeContext } from "utils/contexts/theme";
 
-import { masonryContainerClasses } from "utils/layout/columns";
 import { withPageAuth } from "utils/auth";
 import { getDashboardData } from "utils/config/dashboard";
 import useWindowFocus from "utils/hooks/window-focus";
@@ -292,16 +291,7 @@ function Home({ initialSettings }) {
           </div>
         )}
         {layoutGroups.length > 0 && (
-          <div
-            key="layoutGroups"
-            id="layout-groups"
-            className={classNames(
-              "m-4 sm:m-8 sm:mt-4 mb-2",
-              settings.masonry
-                ? masonryContainerClasses("services", settings.fiveColumns ? 5 : settings.maxGroupColumns)
-                : "flex flex-wrap items-start",
-            )}
-          >
+          <div key="layoutGroups" id="layout-groups" className="flex flex-wrap m-4 sm:m-8 sm:mt-4 items-start mb-2">
             {layoutGroups.map((group) =>
               group.services ? (
                 <ServicesGroup
@@ -312,7 +302,6 @@ function Home({ initialSettings }) {
                   disableCollapse={settings.disableCollapse}
                   useEqualHeights={settings.useEqualHeights}
                   groupsInitiallyCollapsed={settings.groupsInitiallyCollapsed}
-                  masonry={settings.masonry}
                 />
               ) : (
                 <BookmarksGroup
@@ -322,7 +311,6 @@ function Home({ initialSettings }) {
                   disableCollapse={settings.disableCollapse}
                   maxGroupColumns={settings.maxBookmarkGroupColumns ?? settings.maxGroupColumns}
                   groupsInitiallyCollapsed={settings.groupsInitiallyCollapsed}
-                  masonry={settings.masonry}
                   bookmarksStyle={settings.bookmarksStyle}
                 />
               ),
@@ -330,16 +318,7 @@ function Home({ initialSettings }) {
           </div>
         )}
         {serviceGroups?.length > 0 && (
-          <div
-            key="services"
-            id="services"
-            className={classNames(
-              "m-4 sm:m-8 sm:mt-4 mb-2",
-              settings.masonry
-                ? masonryContainerClasses("services", settings.fiveColumns ? 5 : settings.maxGroupColumns)
-                : "flex flex-wrap items-start",
-            )}
-          >
+          <div key="services" id="services" className="flex flex-wrap m-4 sm:m-8 sm:mt-4 items-start mb-2">
             {serviceGroups.map((group) => (
               <ServicesGroup
                 key={group.name}
@@ -348,22 +327,12 @@ function Home({ initialSettings }) {
                 maxGroupColumns={settings.fiveColumns ? 5 : settings.maxGroupColumns}
                 disableCollapse={settings.disableCollapse}
                 groupsInitiallyCollapsed={settings.groupsInitiallyCollapsed}
-                masonry={settings.masonry}
               />
             ))}
           </div>
         )}
         {bookmarkGroups?.length > 0 && (
-          <div
-            key="bookmarks"
-            id="bookmarks"
-            className={classNames(
-              "m-4 sm:m-8 sm:mt-4 mb-2",
-              settings.masonry
-                ? masonryContainerClasses("bookmarks", settings.maxBookmarkGroupColumns ?? settings.maxGroupColumns)
-                : "flex flex-wrap items-start",
-            )}
-          >
+          <div key="bookmarks" id="bookmarks" className="flex flex-wrap m-4 sm:m-8 sm:mt-4 items-start mb-2">
             {bookmarkGroups.map((group) => (
               <BookmarksGroup
                 key={group.name}
@@ -372,7 +341,6 @@ function Home({ initialSettings }) {
                 disableCollapse={settings.disableCollapse}
                 maxGroupColumns={settings.maxBookmarkGroupColumns ?? settings.maxGroupColumns}
                 groupsInitiallyCollapsed={settings.groupsInitiallyCollapsed}
-                masonry={settings.masonry}
                 bookmarksStyle={settings.bookmarksStyle}
               />
             ))}
@@ -394,7 +362,6 @@ function Home({ initialSettings }) {
     settings.cardBlur,
     settings.groupsInitiallyCollapsed,
     settings.bookmarksStyle,
-    settings.masonry,
     initialSettings.layout,
   ]);
 

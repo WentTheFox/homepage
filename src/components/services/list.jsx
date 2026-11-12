@@ -1,13 +1,13 @@
 import classNames from "classnames";
 import Item from "components/services/item";
 
-import { columnMap } from "../../utils/layout/columns";
+import { serviceListLayoutClasses } from "../../utils/layout/columns";
 
 export default function List({ groupName, services, layout, useEqualHeights, header }) {
   return (
     <ul
       className={classNames(
-        layout?.style === "row" ? `grid ${columnMap[layout?.columns]} gap-x-2` : "flex flex-col",
+        serviceListLayoutClasses(layout),
         header ? "mt-3" : "",
         "services-list",
       )}
@@ -18,6 +18,7 @@ export default function List({ groupName, services, layout, useEqualHeights, hea
           service={service}
           groupName={groupName}
           useEqualHeights={layout?.useEqualHeights ?? useEqualHeights}
+          masonry={layout?.style === "row" && layout?.masonry}
         />
       ))}
     </ul>

@@ -11,28 +11,21 @@ export const columnMap = [
 ];
 
 // Literal class names so Tailwind can detect them (no dynamic interpolation).
-const masonryWideColumns = {
-  5: "3xl:columns-5",
-  6: "3xl:columns-6",
-  7: "3xl:columns-7",
-  8: "3xl:columns-8",
-};
+export const masonryColumnMap = [
+  "columns-1 md:columns-1 lg:columns-1",
+  "columns-1 md:columns-1 lg:columns-1",
+  "columns-1 md:columns-2 lg:columns-2",
+  "columns-1 md:columns-2 lg:columns-3",
+  "columns-1 md:columns-2 lg:columns-4",
+  "columns-1 md:columns-2 lg:columns-5",
+  "columns-1 md:columns-2 lg:columns-6",
+  "columns-1 md:columns-2 lg:columns-7",
+  "columns-1 md:columns-2 lg:columns-8",
+];
 
-const masonryBaseColumns = {
-  services: "columns-1 md:columns-2 lg:columns-3 xl:columns-4",
-  bookmarks: "columns-1 md:columns-4 lg:columns-5 xl:columns-6",
-};
-
-// CSS multi-column container classes for the masonry layout. Mirrors the breakpoints
-// of the flex-basis classes used by the regular layout.
-export function masonryContainerClasses(kind, maxGroupColumns) {
-  const max = parseInt(maxGroupColumns, 10);
-  const minimum = kind === "bookmarks" ? 7 : 5;
-  const wide = max >= minimum ? (masonryWideColumns[Math.min(max, 8)] ?? "") : "";
-  return `${masonryBaseColumns[kind]} ${wide} gap-0`.replace(/\s+/g, " ").trim();
-}
-
-// Row-style groups span every column, splitting the masonry container into segments.
-export function masonryGroupClasses(layout) {
-  return layout?.style === "row" ? "[column-span:all]" : "break-inside-avoid";
+// Container classes for the service list inside one group. Masonry (per-group `masonry: true`)
+// only applies to row-style groups, which are the ones that use columns.
+export function serviceListLayoutClasses(layout) {
+  if (layout?.style !== "row") return "flex flex-col";
+  return layout.masonry ? `${masonryColumnMap[layout.columns]} gap-x-2` : `grid ${columnMap[layout.columns]} gap-x-2`;
 }
