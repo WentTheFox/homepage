@@ -29,7 +29,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       # Run Vitest directly so `--shard` is parsed as an option
+      # Node 25+ defines a global localStorage getter that returns undefined (without --localstorage-file) and shadows jsdom's, which fails every
+      # test touching localStorage; turning the experimental Web Storage global off lets jsdom's work (Node 24, upstream's version, has no such global)
       - run: pnpm -s exec vitest run --coverage --shard ${{ matrix.shard }}/4 --pool forks
+        env:
+          NODE_OPTIONS: --no-experimental-webstorage
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
