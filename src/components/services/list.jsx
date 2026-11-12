@@ -5,13 +5,7 @@ import { serviceListLayoutClasses } from "../../utils/layout/columns";
 
 export default function List({ groupName, services, layout, useEqualHeights, header }) {
   return (
-    <ul
-      className={classNames(
-        serviceListLayoutClasses(layout),
-        header ? "mt-3" : "",
-        "services-list",
-      )}
-    >
+    <ul className={classNames(serviceListLayoutClasses(layout), header ? "mt-3" : "", "services-list")}>
       {services.map((service) => (
         <Item
           key={[service.container, service.app, service.name].filter((s) => s).join("-")}

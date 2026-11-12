@@ -41,7 +41,8 @@ export default function Item({ service, groupName, useEqualHeights, masonry }) {
       key={service.name}
       id={service.id}
       className={masonry ? "service break-inside-avoid" : "service"}
-      data-name={service.name || ""}>
+      data-name={service.name || ""}
+    >
       <div
         className={classNames(
           settings.cardBlur !== undefined && `backdrop-blur${settings.cardBlur.length ? "-" : ""}${settings.cardBlur}`,
