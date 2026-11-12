@@ -28,12 +28,8 @@ export default defineConfig([
     },
 
     rules: {
-      "import/no-cycle": [
-        "error",
-        {
-          maxDepth: 1,
-        },
-      ],
+      // Off by default because it makes a full run take minutes; CI turns it on with --rule (see .github/workflows/lint.yml).
+      "import/no-cycle": "off",
 
       "import/order": [
         "error",

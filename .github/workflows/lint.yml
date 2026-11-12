@@ -50,5 +50,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # import/no-cycle is off in eslint.config.mjs (too slow for local runs); CI enforces it with the same options upstream uses.
       - name: Lint frontend
-        run: pnpm run lint
+        run: pnpm exec eslint . --rule '{"import/no-cycle": ["error", {"maxDepth": 1}]}'
