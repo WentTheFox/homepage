@@ -344,6 +344,16 @@ If you want to set the maximum columns for bookmark groups separately, you can d
 maxBookmarkGroupColumns: 6 # default is 6, max 8
 ```
 
+### Masonry Layout
+
+By default groups are laid out in flex rows, so a tall group leaves a gap beneath its shorter neighbours. To pack groups into columns instead, add:
+
+```yaml
+masonry: true
+```
+
+Groups then flow top to bottom through each column (CSS multi-column), so the order reads down each column rather than across rows. The column counts follow the same breakpoints as the default layout and respect [maxGroupColumns](#maximum-group-columns). Groups with `style: row` still span the full width.
+
 ### Collapsible sections
 
 You can disable the collapsible feature of services & bookmarks by adding:
