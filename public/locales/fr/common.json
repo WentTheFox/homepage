@@ -20,6 +20,18 @@
         "minutes": "m",
         "seconds": "s"
     },
+    "auth": {
+        "signout": "Se déconnecter",
+        "loginRequired": "Login Required",
+        "loginDescription": "Login to view your dashboard.",
+        "signIn": "Sign in",
+        "password": "Password",
+        "loginVia": "Login via {{provider}}",
+        "redirecting": "Redirecting to {{provider}}",
+        "invalidPassword": "Invalid password. Please try again.",
+        "authenticationError": "Authentication error",
+        "authenticationErrorDescription": "Auth is disabled or misconfigured."
+    },
     "widget": {
         "missing_type": "Type de widget manquant : {{type}}",
         "api_error": "Erreur API",
@@ -36,7 +48,9 @@
         "wait": "Veuillez patienter"
     },
     "search": {
-        "placeholder": "Recherche…"
+        "placeholder": "Recherche…",
+        "provider": "Moteur de recherche : {{name}}",
+        "select_provider": "Sélectionnez un moteur de recherche"
     },
     "resources": {
         "cpu": "CPU",
@@ -71,6 +85,15 @@
         "degraded": "Dégradé",
         "no_data": "Aucune données de stockage disponible"
     },
+    "duplicati": {
+        "jobs": "Tâches",
+        "stored": "Enregistrées",
+        "lastBackup": "Dernière exécution",
+        "nextRun": "Prochaine exécution",
+        "running": "Démarré",
+        "warnings": "Avertissements",
+        "errors": "Erreurs"
+    },
     "docker": {
         "rx": "Rx",
         "tx": "Tx",
@@ -85,7 +108,12 @@
         "unhealthy": "Mauvaise santé",
         "not_found": "Inconnu",
         "exited": "Arrêté",
-        "partial": "Partiel"
+        "partial": "Partiel",
+        "created": "Créé",
+        "paused": "En pause",
+        "restarting": "Redémarrage",
+        "removing": "Suppression",
+        "dead": "Mort"
     },
     "ping": {
         "error": "Erreur",
@@ -120,7 +148,8 @@
         "movies": "Films",
         "series": "Séries",
         "episodes": "Épisodes",
-        "songs": "Chansons"
+        "songs": "Chansons",
+        "albums": "Albums"
     },
     "esphome": {
         "offline": "Hors ligne",
@@ -236,6 +265,16 @@
         "leech": "En téléchargement",
         "seed": "En partage"
     },
+    "qui": {
+        "leech": "Leech",
+        "download": "Download",
+        "seed": "Seed",
+        "upload": "Upload",
+        "total": "Total",
+        "errored": "Errored",
+        "ratio": "Ratio",
+        "freeSpace": "Free"
+    },
     "qnap": {
         "cpuUsage": "Utilisation CPU",
         "memUsage": "RAM utilisée",
@@ -328,7 +367,10 @@
     "portainer": {
         "running": "En cours d'exécution",
         "stopped": "Arrêté",
-        "total": "Total"
+        "total": "Total",
+        "applications": "Applications",
+        "services": "Services",
+        "namespaces": "Namespaces"
     },
     "suwayomi": {
         "download": "Téléchargé",
@@ -458,13 +500,19 @@
     "authentik": {
         "users": "Utilisateurs",
         "loginsLast24H": "Connexions (24 h)",
-        "failedLoginsLast24H": "Connexions échouées (24 h)"
+        "failedLoginsLast24H": "Connexions échouées (24 h)",
+        "authorizationsLast24H": "Authentifications (24h)"
     },
     "proxmox": {
         "mem": "RAM",
         "cpu": "CPU",
         "lxc": "LXC",
         "vms": "VMs"
+    },
+    "pulse": {
+        "nodes": "Nœuds",
+        "vms": "Machines virtuelles",
+        "lxcs": "LXCs"
     },
     "glances": {
         "cpu": "CPU",
@@ -715,7 +763,7 @@
     "uptimekuma": {
         "up": "Sites actifs",
         "down": "Sites inactifs",
-        "uptime": "Démarré depuis",
+        "uptime": "Disponibilité",
         "incident": "Incident",
         "m": "m"
     },
@@ -754,7 +802,8 @@
         "queue": "File d'attente",
         "processing": "En traitement",
         "processed": "Traité",
-        "time": "Temps"
+        "time": "Temps",
+        "failed": "Failed"
     },
     "firefly": {
         "networth": "Valeur Nette",
@@ -832,6 +881,14 @@
         "books": "Livres",
         "reading": "En cours de lecture",
         "finished": "Terminés"
+    },
+    "bookorbit": {
+        "books": "Books",
+        "authors": "Authors",
+        "series": "Series",
+        "storage": "Storage",
+        "reading": "Reading",
+        "finished": "Finished"
     },
     "jdownloader": {
         "downloadCount": "File d'attente",
@@ -931,6 +988,22 @@
         "mailboxes": "Boites mail",
         "mails": "Courriels",
         "storage": "Stockage"
+    },
+    "maintainerr": {
+        "itemsHandled": "Articles traités",
+        "episodesHandled": "Épisodes gérés",
+        "moviesHandled": "Films manipulés",
+        "showsHandled": "Montre géré",
+        "seasonsHandled": "Saisons gérées",
+        "reclaimable": "Récupérable",
+        "movieReclaimable": "Film Reclaimable",
+        "showReclaimable": "Voir réclamable",
+        "totalCapacity": "Capacité totale"
+    },
+    "netbird": {
+        "online": "Online Peers",
+        "users": "Users",
+        "login_expired": "Login Expired"
     },
     "netdata": {
         "warnings": "Avertissements",
@@ -1070,7 +1143,15 @@
         "cpu": "CPU",
         "memory": "RAM",
         "disk": "Disque",
-        "network": "Réseau"
+        "network": "Réseau",
+        "temp": "Temp",
+        "load": "Load",
+        "gpu": "GPU",
+        "uptime": "Uptime",
+        "services": "Services",
+        "updates": "Updates",
+        "battery": "Battery",
+        "agent": "Agent"
     },
     "argocd": {
         "apps": "Applications",
@@ -1210,5 +1291,19 @@
         "burned": "Brûlé",
         "remaining": "Restant",
         "steps": "Pas"
+    },
+    "syncthing": {
+        "connected": "Connecté",
+        "synced": "Synchronisé",
+        "errors": "Erreurs",
+        "storage": "Stockage"
+    },
+    "sportarr": {
+        "wanted": "Recherché",
+        "queued": "En file d'attente",
+        "leagues": "Ligues"
+    },
+    "feed": {
+        "noItems": "No items"
     }
 }

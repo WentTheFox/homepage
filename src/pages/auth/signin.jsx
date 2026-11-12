@@ -1,13 +1,21 @@
 import classNames from "classnames";
-import { getProviders, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { useTranslation } from "next-i18next/pages";
+import { serverSideTranslations } from "next-i18next/pages/serverSideTranslations";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BiShieldQuarter } from "react-icons/bi";
 
 import { getSettings } from "utils/config/config";
+import normalizeLanguage from "utils/language";
 
-export default function SignIn({ providers, settings }) {
+const PUBLIC_SIGN_IN_SETTINGS = ["theme", "color", "title", "background", "backgroundOpacity"];
+const AUTO_LOGIN_KEY = "homepage-autologin-attempt";
+const AUTO_LOGIN_RETRY_MS = 10000;
+
+export default function SignIn({ providers, settings, autoLogin }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const theme = settings?.theme || "dark";
   const color = settings?.color || "slate";
@@ -17,6 +25,36 @@ export default function SignIn({ providers, settings }) {
     return typeof value === "string" ? value : "/";
   }, [router.query?.callbackUrl]);
   const error = router.query?.error;
+
+  const oidcProvider = useMemo(
+    () => Object.values(providers ?? {}).find((provider) => provider.type !== "credentials"),
+    [providers],
+  );
+  // Try to avoid auto-login loop, e.g. if there was an error (or explicitly disabled via query param)
+  const autoLoginBlocked = Boolean(error) || router.query?.autologin === "0";
+  const redirecting = Boolean(autoLogin && oidcProvider && !autoLoginBlocked);
+
+  const attempted = useRef(false);
+
+  useEffect(() => {
+    if (!redirecting || attempted.current) return;
+    attempted.current = true;
+
+    let lastAttempt = 0;
+    try {
+      lastAttempt = Number(window.sessionStorage.getItem(AUTO_LOGIN_KEY)) || 0;
+      window.sessionStorage.setItem(AUTO_LOGIN_KEY, String(Date.now()));
+    } catch {
+      // sessionStorage throws when site data is blocked, fall through and redirect anyway
+    }
+    // Getting here quickly means the session never stuck, hand it back to the user
+    if (Date.now() - lastAttempt < AUTO_LOGIN_RETRY_MS) {
+      router.replace(`/auth/signin?autologin=0&callbackUrl=${encodeURIComponent(callbackUrl)}`);
+      return;
+    }
+
+    signIn(oidcProvider.id, { callbackUrl });
+  }, [redirecting, oidcProvider, callbackUrl, router]);
 
   let backgroundImage = "";
   let opacity = settings?.backgroundOpacity ?? 0;
@@ -93,9 +131,9 @@ export default function SignIn({ providers, settings }) {
               <BiShieldQuarter className="h-6 w-6" />
             </div>
             <h1 className="mt-6 text-2xl font-semibold text-gray-900 dark:text-slate-100">
-              Authentication not configured
+              {t("auth.authenticationError")}
             </h1>
-            <p className="mt-3 text-sm text-gray-600 dark:text-slate-400">OIDC is disabled or misconfigured.</p>
+            <p className="mt-3 text-sm text-gray-600 dark:text-slate-400">{t("auth.authenticationErrorDescription")}</p>
           </div>
         </main>
       </>
@@ -132,18 +170,23 @@ export default function SignIn({ providers, settings }) {
             <section className="flex flex-col justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-theme-500/30 bg-theme-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-theme-600 dark:text-theme-300">
-                  Login Required
+                  {t("auth.loginRequired")}
                 </div>
                 <h1 className="mt-6 text-3xl font-semibold text-gray-900 dark:text-slate-100">{title}</h1>
-                <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">Login to view your dashboard.</p>
+                <p className="mt-3 text-sm text-gray-600 dark:text-slate-300">{t("auth.loginDescription")}</p>
               </div>
             </section>
 
             <section className="flex flex-col justify-center gap-6">
               <div className="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-lg shadow-black/5 dark:border-white/10 dark:bg-slate-900/70">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Sign in</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{t("auth.signIn")}</h2>
                 <div className="mt-6 space-y-3">
-                  {hasPasswordProvider && (
+                  {redirecting && (
+                    <p className="text-sm text-gray-600 dark:text-slate-300">
+                      {t("auth.redirecting", { provider: oidcProvider?.name })}&hellip;
+                    </p>
+                  )}
+                  {!redirecting && hasPasswordProvider && (
                     <form
                       className="space-y-3"
                       onSubmit={async (event) => {
@@ -155,7 +198,9 @@ export default function SignIn({ providers, settings }) {
                         });
                       }}
                     >
-                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Password</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                        {t("auth.password")}
+                      </label>
                       <input
                         type="password"
                         name="password"
@@ -169,11 +214,12 @@ export default function SignIn({ providers, settings }) {
                         type="submit"
                         className="group w-full rounded-xl bg-theme-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-theme-600/20 transition hover:-translate-y-0.5 hover:bg-theme-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-theme-500"
                       >
-                        <span className="flex items-center justify-center gap-2">Sign in &rarr;</span>
+                        <span className="flex items-center justify-center gap-2">{t("auth.signIn")} &rarr;</span>
                       </button>
                     </form>
                   )}
-                  {!hasPasswordProvider &&
+                  {!redirecting &&
+                    !hasPasswordProvider &&
                     Object.values(providers).map((provider) => (
                       <button
                         key={provider.id}
@@ -181,13 +227,15 @@ export default function SignIn({ providers, settings }) {
                         onClick={() => signIn(provider.id, { callbackUrl })}
                         className="group w-full rounded-xl bg-theme-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-theme-600/20 transition hover:-translate-y-0.5 hover:bg-theme-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-theme-500"
                       >
-                        <span className="flex items-center justify-center gap-2">Login via {provider.name} &rarr;</span>
+                        <span className="flex items-center justify-center gap-2">
+                          {t("auth.loginVia", { provider: provider.name })} &rarr;
+                        </span>
                       </button>
                     ))}
                 </div>
                 {hasPasswordProvider && error && (
                   <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-200">
-                    Invalid password. Please try again.
+                    {t("auth.invalidPassword")}
                   </p>
                 )}
               </div>
@@ -200,9 +248,30 @@ export default function SignIn({ providers, settings }) {
 }
 
 export async function getServerSideProps(context) {
-  const providers = await getProviders();
-  const settings = getSettings();
+  // Avoid getProviders() fetch
+  let providers = {};
+  try {
+    // Dynamic so a bad config throws in here rather than at page load
+    const { authOptions } = await import("pages/api/auth/[...nextauth]");
+    providers = Object.fromEntries(authOptions.providers.map(({ id, name, type }) => [id, { id, name, type }]));
+  } catch (e) {
+    console.error("Unable to load auth providers: %s", e.message);
+  }
+
+  const homepageSettings = getSettings();
+  const language = normalizeLanguage(homepageSettings.language);
+  const settings = Object.fromEntries(
+    PUBLIC_SIGN_IN_SETTINGS.filter((key) => Object.prototype.hasOwnProperty.call(homepageSettings, key)).map((key) => [
+      key,
+      homepageSettings[key],
+    ]),
+  );
   return {
-    props: { providers, settings },
+    props: {
+      providers,
+      settings,
+      autoLogin: process.env.HOMEPAGE_OIDC_AUTO_LOGIN === "true",
+      ...(await serverSideTranslations(language)),
+    },
   };
 }

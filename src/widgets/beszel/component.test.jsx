@@ -12,6 +12,26 @@ vi.mock("utils/proxy/use-widget-api", () => ({ default: useWidgetAPI }));
 
 import Component from "./component";
 
+const fullSystem = {
+  id: "sys1",
+  name: "MySystem",
+  status: "up",
+  updated: 123,
+  info: {
+    cpu: 10,
+    mp: 20,
+    dp: 30,
+    dt: 43.5,
+    la: [1.75, 1.17, 0.85],
+    g: 12,
+    u: 90061,
+    sv: [60, 2],
+    pu: [7, 1],
+    bat: [85, 4],
+    v: "0.21.1",
+  },
+};
+
 describe("widgets/beszel/component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,7 +43,7 @@ describe("widgets/beszel/component", () => {
     const service = { widget: { type: "beszel" } };
     const { container } = renderWithProviders(<Component service={service} />, { settings: { hideErrors: false } });
 
-    expect(service.widget.fields).toEqual(["systems", "up"]);
+    expect(service.widget.fields).toBeUndefined();
     expect(container.querySelectorAll(".service-block")).toHaveLength(2);
     expect(screen.getByText("beszel.systems")).toBeInTheDocument();
     expect(screen.getByText("beszel.up")).toBeInTheDocument();
@@ -66,7 +86,7 @@ describe("widgets/beszel/component", () => {
     const service = { widget: { type: "beszel", systemId: "sys1" } };
     const { container } = renderWithProviders(<Component service={service} />, { settings: { hideErrors: false } });
 
-    expect(service.widget.fields).toEqual(["name", "status", "cpu", "memory"]);
+    expect(service.widget.fields).toBeUndefined();
     expect(container.querySelectorAll(".service-block")).toHaveLength(4);
 
     expectBlockValue(container, "beszel.name", "MySystem");
@@ -103,6 +123,34 @@ describe("widgets/beszel/component", () => {
     expectBlockValue(container, "beszel.name", "MySystem");
     expectBlockValue(container, "beszel.disk", 30);
     expectBlockValue(container, "beszel.network", 14.5);
+  });
+
+  it("renders temperature, load, gpu and uptime fields", () => {
+    useWidgetAPI.mockReturnValue({ data: { totalItems: 1, items: [fullSystem] }, error: undefined });
+
+    const service = { widget: { type: "beszel", systemId: "sys1", fields: ["temp", "load", "gpu", "uptime"] } };
+    const { container } = renderWithProviders(<Component service={service} />, { settings: { hideErrors: false } });
+
+    expect(container.querySelectorAll(".service-block")).toHaveLength(4);
+    expectBlockValue(container, "beszel.temp", 43.5);
+    expectBlockValue(container, "beszel.load", 1.75);
+    expectBlockValue(container, "beszel.gpu", 12);
+    expectBlockValue(container, "beszel.uptime", 90061);
+  });
+
+  it("renders services, updates, battery and agent fields", () => {
+    useWidgetAPI.mockReturnValue({ data: { totalItems: 1, items: [fullSystem] }, error: undefined });
+
+    const service = {
+      widget: { type: "beszel", systemId: "sys1", fields: ["services", "updates", "battery", "agent"] },
+    };
+    const { container } = renderWithProviders(<Component service={service} />, { settings: { hideErrors: false } });
+
+    expect(container.querySelectorAll(".service-block")).toHaveLength(4);
+    expectBlockValue(container, "beszel.services", "58 / 60");
+    expectBlockValue(container, "beszel.updates", 7);
+    expectBlockValue(container, "beszel.battery", 85);
+    expectBlockValue(container, "beszel.agent", "0.21.1");
   });
 
   it("renders error when systemId is not found", () => {

@@ -20,6 +20,18 @@
         "minutes": "m",
         "seconds": "s"
     },
+    "auth": {
+        "signout": "Odhlásit se",
+        "loginRequired": "Login Required",
+        "loginDescription": "Login to view your dashboard.",
+        "signIn": "Sign in",
+        "password": "Password",
+        "loginVia": "Login via {{provider}}",
+        "redirecting": "Redirecting to {{provider}}",
+        "invalidPassword": "Invalid password. Please try again.",
+        "authenticationError": "Authentication error",
+        "authenticationErrorDescription": "Auth is disabled or misconfigured."
+    },
     "widget": {
         "missing_type": "Chybí typ widgetu: {{type}}",
         "api_error": "Chyba API",
@@ -36,7 +48,9 @@
         "wait": "Počkejte prosím"
     },
     "search": {
-        "placeholder": "Hledat…"
+        "placeholder": "Hledat…",
+        "provider": "Vyhledávač: {{name}}",
+        "select_provider": "Vyberte vyhledávač"
     },
     "resources": {
         "cpu": "Využití procesoru",
@@ -71,6 +85,15 @@
         "degraded": "Degradováno",
         "no_data": "Nejsou k dispozici žádná data úložiště"
     },
+    "duplicati": {
+        "jobs": "Úlohy",
+        "stored": "Uloženo",
+        "lastBackup": "Naposledy spuštěno",
+        "nextRun": "Další spuštění",
+        "running": "Běží",
+        "warnings": "Upozornění",
+        "errors": "Chyby"
+    },
     "docker": {
         "rx": "RX",
         "tx": "TX",
@@ -85,7 +108,12 @@
         "unhealthy": "Nezdravý",
         "not_found": "Nenalezen",
         "exited": "Ukončen",
-        "partial": "Částečný"
+        "partial": "Částečný",
+        "created": "Vytvořeno",
+        "paused": "Pozastaveno",
+        "restarting": "Restartuji",
+        "removing": "Odebírání",
+        "dead": "Mrtvý"
     },
     "ping": {
         "error": "Chyba",
@@ -120,7 +148,8 @@
         "movies": "Filmy",
         "series": "Seriály",
         "episodes": "Epizody",
-        "songs": "Skladby"
+        "songs": "Skladby",
+        "albums": "Alba"
     },
     "esphome": {
         "offline": "Offline",
@@ -236,6 +265,16 @@
         "leech": "Leechované",
         "seed": "Seedované"
     },
+    "qui": {
+        "leech": "Leechované",
+        "download": "Stahování",
+        "seed": "Seedované",
+        "upload": "Nahravání",
+        "total": "Celkem",
+        "errored": "Chybné",
+        "ratio": "Poměr",
+        "freeSpace": "Volné"
+    },
     "qnap": {
         "cpuUsage": "Využití procesoru",
         "memUsage": "Využití paměti",
@@ -328,7 +367,10 @@
     "portainer": {
         "running": "Běží",
         "stopped": "Zastaveno",
-        "total": "Celkem"
+        "total": "Celkem",
+        "applications": "Applications",
+        "services": "Services",
+        "namespaces": "Namespaces"
     },
     "suwayomi": {
         "download": "Staženo",
@@ -458,13 +500,19 @@
     "authentik": {
         "users": "Uživatelé",
         "loginsLast24H": "Příhlášení (24h)",
-        "failedLoginsLast24H": "Neúspěšná přihlášení (24h)"
+        "failedLoginsLast24H": "Neúspěšná přihlášení (24h)",
+        "authorizationsLast24H": "Autorizace (24h)"
     },
     "proxmox": {
         "mem": "Využití paměti",
         "cpu": "Využití procesoru",
         "lxc": "LXC",
         "vms": "Virtuální Stroje"
+    },
+    "pulse": {
+        "nodes": "Uzly (Nody)",
+        "vms": "Virtuální Stroje",
+        "lxcs": "LXC"
     },
     "glances": {
         "cpu": "Využití procesoru",
@@ -754,7 +802,8 @@
         "queue": "Fronta",
         "processing": "Zpracovává se",
         "processed": "Zpracováno",
-        "time": "Čas"
+        "time": "Čas",
+        "failed": "Selhalo"
     },
     "firefly": {
         "networth": "Čisté jmění",
@@ -830,6 +879,14 @@
     "booklore": {
         "libraries": "Knihovny",
         "books": "Knihy",
+        "reading": "Čtené",
+        "finished": "Přečtené"
+    },
+    "bookorbit": {
+        "books": "Knihy",
+        "authors": "Autoři",
+        "series": "Série",
+        "storage": "Úložiště",
         "reading": "Čtené",
         "finished": "Přečtené"
     },
@@ -931,6 +988,22 @@
         "mailboxes": "E-mailové schránky",
         "mails": "Maily",
         "storage": "Úložiště"
+    },
+    "maintainerr": {
+        "itemsHandled": "Zpracované položky",
+        "episodesHandled": "Zpracované epizody",
+        "moviesHandled": "Zpracované filmy",
+        "showsHandled": "Zpracované seriály",
+        "seasonsHandled": "Zpracované série",
+        "reclaimable": "Uvolnitelné",
+        "movieReclaimable": "Uvolnitelné filmy",
+        "showReclaimable": "Uvolnitelné seriály",
+        "totalCapacity": "Celková kapacita"
+    },
+    "netbird": {
+        "online": "Online klienti",
+        "users": "Uživatelé",
+        "login_expired": "Platnost přihlášení vypršela"
     },
     "netdata": {
         "warnings": "Upozornění",
@@ -1070,7 +1143,15 @@
         "cpu": "Využití procesoru",
         "memory": "Využití paměti",
         "disk": "Disk",
-        "network": "Síť"
+        "network": "Síť",
+        "temp": "Temp",
+        "load": "Load",
+        "gpu": "GPU",
+        "uptime": "Uptime",
+        "services": "Services",
+        "updates": "Updates",
+        "battery": "Battery",
+        "agent": "Agent"
     },
     "argocd": {
         "apps": "Aplikace",
@@ -1210,5 +1291,19 @@
         "burned": "Spáleno",
         "remaining": "Zbývá",
         "steps": "Kroky"
+    },
+    "syncthing": {
+        "connected": "Připojeno",
+        "synced": "Synchronizováno",
+        "errors": "Chyby",
+        "storage": "Úložiště"
+    },
+    "sportarr": {
+        "wanted": "Požadované",
+        "queued": "Ve frontě",
+        "leagues": "Ligy"
+    },
+    "feed": {
+        "noItems": "Žádné položky"
     }
 }

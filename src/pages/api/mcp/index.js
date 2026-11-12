@@ -1,25 +1,36 @@
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "pages/api/auth/[...nextauth]";
-import { handleMcpRequest, mcpAuthorized, mcpEnabled } from "utils/mcp/homepage-mcp";
+import { withAllowedHost } from "utils/auth";
+import { isAuthEnabled } from "utils/env";
+import createLogger from "utils/logger";
+import { handleMcpRequest, mcpEnabled, mcpTokenAuthorized, mcpTokenConfigError } from "utils/mcp/homepage-mcp";
 
 async function hasHomepageSession(req, res) {
-  if (!process.env.HOMEPAGE_AUTH_ENABLED) return false;
+  if (!isAuthEnabled()) return false;
   return Boolean(await getServerSession(req, res, authOptions));
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
+  res.setHeader("Cache-Control", "private, no-store");
   if (!mcpEnabled()) {
     return res.status(404).end("Not Found");
   }
 
-  if (!mcpAuthorized(req) && !(await hasHomepageSession(req, res))) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
+  // Method check precedes auth so CORS preflights aren't answered with a 401.
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).end("Method Not Allowed");
+  }
+
+  const tokenError = mcpTokenConfigError();
+  if (tokenError) {
+    createLogger("mcp").error(tokenError);
+    return res.status(500).json({ error: "MCP token is misconfigured. See logs for details." });
+  }
+
+  if (!mcpTokenAuthorized(req) && !(await hasHomepageSession(req, res))) {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   const response = handleMcpRequest(req.body);
@@ -29,3 +40,5 @@ export default async function handler(req, res) {
 
   return res.status(200).json(response);
 }
+
+export default withAllowedHost(handler);

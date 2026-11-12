@@ -184,6 +184,42 @@ describe("utils/mcp/homepage-mcp", () => {
     );
   });
 
+  it("preserves env placeholders when adding a service", async () => {
+    process.env.HOMEPAGE_MCP_ALLOW_WRITE = "true";
+    const configDir = mkdtempSync(path.join(tmpdir(), "homepage-mcp-test-"));
+    writeFileSync(
+      path.join(configDir, "services.yaml"),
+      "- Media:\n" +
+        "    - Jellyfin:\n" +
+        "        href: http://{{HOMEPAGE_VAR_HOST}}:8096\n" +
+        "        widget:\n" +
+        "          type: jellyfin\n" +
+        "          key: {{HOMEPAGE_VAR_JELLYFIN_KEY}}\n" +
+        '          password: "{{HOMEPAGE_FILE_PASSWORD}}"\n',
+    );
+    const mod = await loadMcpWithConfigDir(configDir);
+
+    const response = mod.handleMcpRequest({
+      jsonrpc: "2.0",
+      id: 11,
+      method: "tools/call",
+      params: { name: "add_service", arguments: { group: "Tools", name: "Grafana" } },
+    });
+
+    expect(response.result.isError).toBeUndefined();
+    expect(readFileSync(path.join(configDir, "services.yaml"), "utf8")).toBe(
+      "- Media:\n" +
+        "    - Jellyfin:\n" +
+        "        href: http://{{HOMEPAGE_VAR_HOST}}:8096\n" +
+        "        widget:\n" +
+        "          type: jellyfin\n" +
+        "          key: {{HOMEPAGE_VAR_JELLYFIN_KEY}}\n" +
+        '          password: "{{HOMEPAGE_FILE_PASSWORD}}"\n' +
+        "- Tools:\n" +
+        "    - Grafana: {}\n",
+    );
+  });
+
   it("does not add a duplicate service in the same group", async () => {
     process.env.HOMEPAGE_MCP_ALLOW_WRITE = "true";
     const configDir = mkdtempSync(path.join(tmpdir(), "homepage-mcp-test-"));
@@ -617,19 +653,49 @@ describe("utils/mcp/homepage-mcp", () => {
     });
   });
 
-  it("checks MCP token and auth mode authorization", async () => {
+  it("requires a matching MCP token for token authorization", async () => {
     const mod = await loadMcpWithConfigDir(mkdtempSync(path.join(tmpdir(), "homepage-mcp-test-")));
 
     expect(mod.mcpTokenAuthorized({ headers: {} })).toBe(false);
-    expect(mod.mcpAuthorized({ headers: {} })).toBe(true);
 
-    process.env.HOMEPAGE_AUTH_ENABLED = "true";
-    expect(mod.mcpAuthorized({ headers: {} })).toBe(false);
-
-    process.env.HOMEPAGE_MCP_TOKEN = "secret";
-    expect(mod.mcpTokenAuthorized({ headers: { authorization: "Bearer secret" } })).toBe(true);
-    expect(mod.mcpTokenAuthorized({ headers: { "x-homepage-mcp-token": "secret" } })).toBe(true);
+    const token = "mcp-tok-0123456789abcdefghijklmnopqrstuv"; // 40 chars
+    process.env.HOMEPAGE_MCP_TOKEN = token;
+    expect(mod.mcpTokenAuthorized({ headers: { authorization: `Bearer ${token}` } })).toBe(true);
+    expect(mod.mcpTokenAuthorized({ headers: { "x-homepage-mcp-token": token } })).toBe(true);
     expect(mod.mcpTokenAuthorized({ headers: { authorization: "Bearer wrong" } })).toBe(false);
-    expect(mod.mcpAuthorized({ headers: { authorization: "Bearer secret" } })).toBe(true);
+
+    // multibyte token at the minimum length still authorizes and doesn't throw on byte-length mismatch
+    const multibyteToken = "é".repeat(32);
+    process.env.HOMEPAGE_MCP_TOKEN = multibyteToken;
+    expect(mod.mcpTokenAuthorized({ headers: { authorization: "Bearer a" } })).toBe(false);
+    expect(mod.mcpTokenAuthorized({ headers: { authorization: `Bearer ${multibyteToken}` } })).toBe(true);
+  });
+
+  it("never authorizes a token below the minimum length, even when presented verbatim", async () => {
+    const mod = await loadMcpWithConfigDir(mkdtempSync(path.join(tmpdir(), "homepage-mcp-test-")));
+
+    process.env.HOMEPAGE_MCP_TOKEN = "change-me";
+    expect(mod.mcpTokenAuthorized({ headers: { authorization: "Bearer change-me" } })).toBe(false);
+    expect(mod.mcpTokenAuthorized({ headers: { "x-homepage-mcp-token": "change-me" } })).toBe(false);
+  });
+
+  it("reports a config error only when MCP is enabled with a too-short token", async () => {
+    const mod = await loadMcpWithConfigDir(mkdtempSync(path.join(tmpdir(), "homepage-mcp-test-")));
+
+    process.env.HOMEPAGE_MCP_ENABLED = "true";
+    process.env.HOMEPAGE_MCP_TOKEN = "change-me";
+    expect(mod.mcpTokenConfigError()).toMatch(/at least 32 characters/i);
+
+    process.env.HOMEPAGE_MCP_TOKEN = "mcp-tok-0123456789abcdefghijklmnopqrstuv";
+    expect(mod.mcpTokenConfigError()).toBeNull();
+
+    // no token configured is valid (session-only mode), so it is not an error
+    delete process.env.HOMEPAGE_MCP_TOKEN;
+    expect(mod.mcpTokenConfigError()).toBeNull();
+
+    // a weak token is ignored entirely when MCP is disabled
+    process.env.HOMEPAGE_MCP_ENABLED = "false";
+    process.env.HOMEPAGE_MCP_TOKEN = "change-me";
+    expect(mod.mcpTokenConfigError()).toBeNull();
   });
 });
